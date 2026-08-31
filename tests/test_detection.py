@@ -28,9 +28,10 @@ def vault(root: Path, config: str = "{}") -> None:
 
 class DetectionTests(unittest.TestCase):
     def test_reader_supports_maps_strings_keywords_comments_and_rejects_reader_forms(self):
-        values = EdnReader('{:path "notes" ; comment\n :mode :triple-lowbar :nested {:x ["y"]} :query (has-ref ?b ?ref)}').read()
+        values = EdnReader('{:path "notes" ; comment\n :mode :triple-lowbar :nested {:x ["y"]} :tags #{"NOW" "TODO"} :query (has-ref ?b ?ref)}').read()
         self.assertEqual(values[":path"], "notes")
         self.assertEqual(values[":mode"], ":triple-lowbar")
+        self.assertEqual(values[":tags"], ["NOW", "TODO"])
         self.assertEqual(values[":query"], ["has-ref", "?b", "?ref"])
         with self.assertRaises(ValueError):
             EdnReader('{:path #foo "notes"}').read()

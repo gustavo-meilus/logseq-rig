@@ -42,10 +42,12 @@ def _payload(relative: str) -> str:
     return (PAYLOAD / relative).read_text(encoding="utf-8")
 
 
-def _entries(root: Path, managed_paths: set[str] | None = None) -> list[tuple[str, str, str]]:
+def _entries(root: Path, manifest: dict[str, object] | None = None) -> list[tuple[str, str, str]]:
     region = BEGIN + _payload("AGENTS.md") + END
     agents = root / "AGENTS.md"
-    if not agents.exists():
+    managed_paths = {entry["path"] for entry in manifest["entries"]} if manifest else None
+    agents_mode = next((entry["mode"] for entry in manifest["entries"] if entry["path"] == "AGENTS.md"), None) if manifest else None
+    if agents_mode == "file" or not agents.exists():
         managed, mode = region, "file"
     else:
         current = _region(agents.read_text(encoding="utf-8"))
@@ -120,7 +122,7 @@ def plan(root: Path, command: str) -> list[Action]:
             elif _digest(path.read_text(encoding="utf-8")) != entry["sha256"]: result.append(Action("modified", entry["path"]))
         return result or [Action("healthy", MANIFEST)]
     if command in {"install", "update"}:
-        entries = _entries(root, {entry["path"] for entry in manifest["entries"]} if manifest else None)
+        entries = _entries(root, manifest)
         if manifest is not None:
             state = plan(root, "doctor")
             if any(action.kind in {"missing", "modified"} for action in state):
@@ -173,7 +175,7 @@ def run(root: Path, command: str, dry_run: bool = False) -> list[Action]:
     if dry_run or any(action.kind == "conflict" for action in actions) or command == "doctor": return actions
     if command in {"install", "update"}:
         manifest = _read_manifest(root)
-        entries = _entries(root, {entry["path"] for entry in manifest["entries"]} if manifest else None)
+        entries = _entries(root, manifest)
         try:
             _atomic_write(root / INCOMPLETE, json.dumps({"operation": command}, sort_keys=True) + "\n")
             for path, _, content in entries: _atomic_write(root / path, content)

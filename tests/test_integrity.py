@@ -49,3 +49,13 @@ class IntegrityTests(unittest.TestCase):
             before = hashlib.sha256(page.read_bytes()).hexdigest()
             self.assertEqual((self.call("check", str(root), "--all"), self.call("check", str(root), "--changed")), ((0, {"status": "pass", "mode": "all", "findings": []}), (0, {"status": "pass", "mode": "changed", "findings": []})))
             self.assertEqual(before, hashlib.sha256(page.read_bytes()).hexdigest())
+
+    def test_asset_filenames_may_contain_parentheses(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary); vault(root, "- [one](../assets/image_(2).png)\n- [two](../assets/nested_(a_(b)).png)\n- [missing](../assets/missing_(1).png)\n")
+            assets = root / "assets"; assets.mkdir()
+            (assets / "image_(2).png").write_bytes(b"")
+            (assets / "nested_(a_(b)).png").write_bytes(b"")
+            code, result = self.call("check", str(root), "--all")
+            self.assertEqual(code, 1)
+            self.assertEqual([item["message"] for item in result["findings"]], ["missing local asset: assets/missing_(1).png"])

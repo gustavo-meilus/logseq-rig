@@ -33,6 +33,14 @@ class LifecycleTests(unittest.TestCase):
             self.assertEqual(run(root, "update")[0].kind, "conflict")
             self.assertEqual(hashlib.sha256((root / "logseq" / "config.edn").read_bytes()).hexdigest(), protected)
 
+    def test_file_owned_agents_survives_reinstall_then_uninstall(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary); vault(root)
+            run(root, "install")
+            self.assertEqual(run(root, "install"), [type(plan(root, "install")[0])("noop", "AGENTS.md")])
+            run(root, "uninstall")
+            self.assertFalse((root / "AGENTS.md").exists())
+
     def test_doctor_and_interruption_are_non_destructive(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary); vault(root); protected = (root / "logseq" / "config.edn").read_bytes()

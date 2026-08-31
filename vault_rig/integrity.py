@@ -14,7 +14,32 @@ from .retrieval import BLOCK_REF, PROPERTY, load
 
 
 UUID = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$", re.I)
-ASSET = re.compile(r"!?\[[^]]*\]\(([^)]+)\)")
+
+
+def _asset_targets(line: str):
+    """Yield Markdown link targets, including filenames containing parentheses."""
+    position = 0
+    while (start := line.find("](", position)) >= 0:
+        if line.rfind("[", 0, start) < 0:
+            position = start + 2
+            continue
+        depth, index, target = 1, start + 2, []
+        while index < len(line) and depth:
+            char = line[index]
+            if char == "\\" and index + 1 < len(line):
+                target.append(line[index + 1]); index += 2
+            elif char == "(":
+                depth += 1; target.append(char); index += 1
+            elif char == ")":
+                depth -= 1
+                if depth:
+                    target.append(char)
+                index += 1
+            else:
+                target.append(char); index += 1
+        if not depth:
+            yield "".join(target)
+        position = index
 
 
 @dataclass(frozen=True)
@@ -80,7 +105,7 @@ def check(descriptor: VaultDescriptor, mode: str, expected_paths: tuple[str, ...
                 properties.append((match["key"], match["value"], location))
                 if match["key"] == "id": ids[match["value"]].append(location)
             refs.extend((identifier, location) for identifier in BLOCK_REF.findall(line))
-            for raw in ASSET.findall(line):
+            for raw in _asset_targets(line):
                 target = raw.split("#", 1)[0]
                 if target and not "://" in target and (target.startswith("assets/") or target.startswith("../assets/")):
                     assets.append((target, location))

@@ -29,7 +29,7 @@ class VaultDescriptor:
 
 
 class EdnReader:
-    """Small EDN reader for config maps; reader macros are intentionally refused."""
+    """Small EDN reader for config maps; only set literals are accepted reader forms."""
 
     def __init__(self, text: str) -> None:
         self.text, self.position = text, 0
@@ -56,6 +56,9 @@ class EdnReader:
         if self.position >= len(self.text):
             raise ValueError("unexpected end of EDN")
         char = self.text[self.position]
+        if self.text.startswith("#{", self.position):
+            self.position += 1
+            return self._collection("}")
         if char == "#":
             raise ValueError("EDN reader forms are unsupported")
         if char == "{":
