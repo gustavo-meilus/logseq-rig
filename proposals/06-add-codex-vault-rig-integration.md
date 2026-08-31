@@ -9,7 +9,7 @@
 
 ## Intent
 
-Install the minimum repository-local Codex integration for Vault Rig so Codex understands Logseq OG semantics, retrieval routing, safe editing, and completion verification without turning `AGENTS.md` into an encyclopedia.
+Install the minimum repository-local Codex integration for Logseq Vault Rig so Codex understands Logseq OG semantics, retrieval routing, safe editing, and completion verification without turning `AGENTS.md` into an encyclopedia.
 
 ## Current / Problem
 
@@ -17,7 +17,7 @@ Codex can read Markdown directly but generic behavior may flatten block structur
 
 ## Desired Behavior
 
-Each Vault Rig installation exposes a concise operating contract, one progressively disclosed `vault-rig` Skill, bounded Codex configuration, and lifecycle hooks that orient sessions and enforce deterministic graph checks after canonical edits.
+Each Logseq Vault Rig installation exposes a concise operating contract, one progressively disclosed `vault-rig` Skill, bounded Codex configuration, and lifecycle hooks that orient sessions and enforce deterministic graph checks after canonical edits.
 
 ## In Scope
 
@@ -43,7 +43,7 @@ Each Vault Rig installation exposes a concise operating contract, one progressiv
 - Canonical Markdown edits trigger the graph check before Codex can report clean completion.
 - A failing Stop check cannot create an unbounded autonomous loop.
 - Read-only knowledge questions can be performed without granting unnecessary mutation authority.
-- Vault Rig remains functional when Logseq is closed, except explicitly live-query features.
+- Logseq Vault Rig remains functional when Logseq is closed, except explicitly live-query features.
 
 ## Constraints / Preservation
 

@@ -13,7 +13,7 @@ Add an optional disposable semantic retrieval layer for conceptually similar Log
 
 ## Current / Problem
 
-Exact search and DataScript cannot reliably find notes that discuss the same idea using different language. However, making embeddings/vector search part of the core Vault Rig would add state, dependencies, and retrieval ambiguity before evidence shows it is needed.
+Exact search and DataScript cannot reliably find notes that discuss the same idea using different language. However, making embeddings/vector search part of the core Logseq Vault Rig would add state, dependencies, and retrieval ambiguity before evidence shows it is needed.
 
 ## Desired Behavior
 

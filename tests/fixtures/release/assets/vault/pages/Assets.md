@@ -1,0 +1,1 @@
+- asset [pixel](../assets/pixel.txt)

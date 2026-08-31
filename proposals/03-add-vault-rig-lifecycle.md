@@ -9,20 +9,20 @@
 
 ## Intent
 
-Provide safe `install`, `update`, `doctor`, and `uninstall` lifecycle operations that apply the managed Vault Rig payload to any detected Logseq OG vault without overwriting user knowledge or unrelated repository configuration.
+Provide safe `install`, `update`, `doctor`, and `uninstall` lifecycle operations that apply the managed Logseq Vault Rig payload to any detected Logseq OG vault without overwriting user knowledge or unrelated repository configuration.
 
 ## Current / Problem
 
-Manual copying is error-prone across multiple vaults. Reapplying Vault Rig can overwrite local customization, create drift, or make uninstall impossible unless file ownership and merge boundaries are explicit.
+Manual copying is error-prone across multiple vaults. Reapplying Logseq Vault Rig can overwrite local customization, create drift, or make uninstall impossible unless file ownership and merge boundaries are explicit.
 
 ## Desired Behavior
 
-A user can point one lifecycle entrypoint at a vault, install Vault Rig repeatedly without duplicate effects, update managed files safely, diagnose drift, and remove only Vault Rig-owned state.
+A user can point one lifecycle entrypoint at a vault, install Logseq Vault Rig repeatedly without duplicate effects, update managed files safely, diagnose drift, and remove only Logseq Vault Rig-owned state.
 
 ## In Scope
 
-- Install namespaced Vault Rig files into the detected vault.
-- Track the installed Vault Rig version and the set/hash of files managed by the installer using a minimal manifest or equivalent deterministic ownership record.
+- Install namespaced Logseq Vault Rig files into the detected vault.
+- Track the installed Logseq Vault Rig version and the set/hash of files managed by the installer using a minimal manifest or equivalent deterministic ownership record.
 - Create missing repository-local Codex/Skill integration only within explicitly managed paths.
 - Handle root `AGENTS.md` conservatively: create it when absent or use a bounded managed section/other non-destructive strategy when user content already exists.
 - Provide `doctor` to report incompatible/missing/locally-modified managed files without changing the vault.
@@ -44,7 +44,7 @@ A user can point one lifecycle entrypoint at a vault, install Vault Rig repeated
 - Update changes only managed content and reports conflicts when managed files were locally modified.
 - Dry-run lists intended changes without changing files.
 - Doctor distinguishes healthy, missing, modified, and version-mismatched managed state.
-- Uninstall removes installed Vault Rig state while preserving pre-existing files and user-owned edits outside managed regions.
+- Uninstall removes installed Logseq Vault Rig state while preserving pre-existing files and user-owned edits outside managed regions.
 - An interrupted install cannot leave canonical knowledge partially rewritten.
 
 ## Constraints / Preservation
@@ -56,7 +56,7 @@ A user can point one lifecycle entrypoint at a vault, install Vault Rig repeated
 
 ## Migration / Rollout
 
-- Existing vaults adopt Vault Rig in place; no note migration is required. Updates must be forward-compatible or fail with explicit instructions.
+- Existing vaults adopt Logseq Vault Rig in place; no note migration is required. Updates must be forward-compatible or fail with explicit instructions.
 
 ## Validation
 

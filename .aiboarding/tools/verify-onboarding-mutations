@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# aiboarding tool: verify maintained onboarding-mutation corpus.
+# Usage: verify-onboarding-mutations <corpus-dir> [validate|computed|report] [evidence.tsv]
+set -euo pipefail
+
+[ "$#" -ge 1 ] && [ "$#" -le 4 ] || { echo "usage: verify-onboarding-mutations <corpus-dir> [validate|computed|report] [evidence.tsv]" >&2; exit 2; }
+corpus="$1"; mode="${2:-report}"; evidence="${3:-$corpus/inferred-evidence.tsv}"
+manifest="$corpus/manifest.tsv"; tool_dir="$(cd "$(dirname "$0")" && pwd)"
+[ -f "$manifest" ] || { echo "mutation corpus: missing manifest" >&2; exit 2; }
+
+required='verification-removal guardrail-weakening guardrail-reversal protected-command architecture-direction runtime-version cross-file-contradiction escalation-removal nested-conflict instruction-chain-budget'
+valid_class() { [ "$1" = challenge ] || [ "$1" = syntax-baseline ]; }
+validate() {
+  local ids=' ' categories=' ' id source operator applicable harm sensors class positive mutant
+  while IFS='|' read -r id source operator applicable harm sensors class positive mutant; do
+    [ "$id" = id ] && continue
+    [ -n "$id" ] && [ -n "$source" ] && [ -n "$operator" ] && [ -n "$applicable" ] && [ -n "$harm" ] && [ -n "$sensors" ] && valid_class "$class" && [ -d "$corpus/$positive" ] && [ -d "$corpus/$mutant" ] || { echo "mutation corpus: invalid record $id" >&2; return 2; }
+    case "$ids" in *" $id "*) echo "mutation corpus: duplicate id $id" >&2; return 2;; esac; ids+="$id "
+    categories+="$operator "
+  done < "$manifest"
+  for operator in $required; do case "$categories" in *" $operator "*) ;; *) echo "mutation corpus: missing operator $operator" >&2; return 2;; esac; done
+}
+fingerprint() { cksum "$manifest" | awk '{print $1 "-" $2}'; }
+computed() {
+  local id source operator applicable harm sensors class positive mutant rc out
+  validate
+  printf 'id|sensor|provenance|outcome|category|locations\n'
+  while IFS='|' read -r id source operator applicable harm sensors class positive mutant; do
+    [ "$id" = id ] && continue
+    [ "$applicable" = yes ] || continue
+    case ",$sensors," in *,preservation,*)
+      set +e; out="$(bash "$tool_dir/check-preservation" "$corpus/$positive/AGENTS.md" "$corpus/$mutant/AGENTS.md" 2>&1)"; rc=$?; set -e
+      [ "$rc" -eq 2 ] && { echo "sensor failure: preservation $id" >&2; return 2; }
+      [ "$rc" -eq 1 ] && printf '%s|preservation|computed|killed|protected-command|AGENTS.md\n' "$id" || printf '%s|preservation|computed|clear|-|-\n' "$id"
+      ;;
+    esac
+    case ",$sensors," in *,audit,*)
+      set +e; out="$(bash "$tool_dir/audit-onboarding-evidence" "$corpus/$mutant" 2>&1)"; rc=$?; set -e
+      [ "$rc" -eq 2 ] && { echo "sensor failure: audit $id" >&2; return 2; }
+      if [ "$rc" -eq 1 ]; then printf '%s|audit|computed|killed|%s|%s\n' "$id" "$operator" "$(printf '%s' "$out" | cut -d'|' -f4 | paste -sd, -)"; else printf '%s|audit|computed|clear|-|-\n' "$id"; fi
+      ;;
+    esac
+  done < "$manifest"
+}
+report() {
+  local computed_file; computed_file="$(mktemp)"; trap 'rm -f "$computed_file"' RETURN
+  computed > "$computed_file" || return $?
+  [ -f "$evidence" ] || { echo "mutation report incomplete: missing inferred evidence" >&2; return 2; }
+  local fp metadata; fp="$(fingerprint)"; metadata="$(head -n 1 "$evidence")"
+  case "$metadata" in "corpus=$fp|audit_skill_revision="*"|runtime_model="*"|reviewed_at="*) ;; *) echo "mutation report incomplete: stale or malformed inferred evidence" >&2; return 2;; esac
+  local total=0 killed=0 challenge=0 challenge_killed=0 baseline=0 baseline_killed=0 survivors=''
+  local id source operator applicable harm sensors class positive mutant found=0 sensor provenance outcome category locations detectors
+  while IFS='|' read -r id source operator applicable harm sensors class positive mutant; do
+    [ "$id" = id ] && continue; [ "$applicable" = yes ] || continue; total=$((total+1)); found=0; detectors=''
+    while IFS='|' read -r sensor provenance outcome category locations; do
+      [ "$sensor" = sensor ] && continue
+      [ "$provenance" = inferred ] || { echo "mutation report incomplete: malformed inferred evidence" >&2; return 2; }
+      [ "$category" = "$operator" ] || continue
+      case "$locations" in *"$id"*|*"AGENTS.md"*) ;; *) continue;; esac
+      if [ "$outcome" = killed ]; then found=1; detectors="${detectors}${detectors:+,}$sensor[inferred]"; fi
+    done < <(tail -n +2 "$evidence")
+    if grep -q "^$id|.*|computed|killed|" "$computed_file"; then found=1; detectors="${detectors}${detectors:+,}$(grep "^$id|.*|computed|killed|" "$computed_file" | head -n 1 | cut -d'|' -f2)[computed]"; fi
+    [ "$class" = challenge ] && challenge=$((challenge+1)) || baseline=$((baseline+1))
+    if [ "$found" -eq 1 ]; then killed=$((killed+1)); [ "$class" = challenge ] && challenge_killed=$((challenge_killed+1)) || baseline_killed=$((baseline_killed+1)); status=killed; else survivors+="$id ($operator); "; status=survived; fi
+    printf '%s|%s|%s|sensors=%s|detectors=%s\n' "$id" "$status" "$class" "$sensors" "${detectors:--}"
+  done < "$manifest"
+  printf 'corpus=%s applicable=%s killed=%s survivors=%s challenge=%s/%s syntax-baseline=%s/%s\n' "$fp" "$total" "$killed" "$((total-killed))" "$challenge_killed" "$challenge" "$baseline_killed" "$baseline"
+  [ -z "$survivors" ] || printf 'gaps=%s\n' "$survivors"
+  printf '%s\n' 'limitation=score measures this maintained corpus, not complete onboarding correctness'
+  [ "$killed" -eq "$total" ] && return 0 || return 1
+}
+case "$mode" in validate) validate;; computed) computed;; report) report;; *) echo "mutation corpus: unknown mode $mode" >&2; exit 2;; esac

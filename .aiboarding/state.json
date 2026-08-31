@@ -1,0 +1,11 @@
+{
+  "aiboarding_version": 2,
+  "canonical_file": "AGENTS.md",
+  "claude_wrapper": "CLAUDE.md",
+  "generated": "2026-08-31",
+  "last_synced_commit": "e4172aebcc1b7f5a0f47b972865c31872645dcd3",
+  "last_drift_classification": {},
+  "receipts": [
+    {"file":"AGENTS.md","level":"full","bytes_before":3806,"bytes_after":3806,"lines_before":51,"lines_after":51,"tokens_before_approx":952,"tokens_after_approx":952,"high_consequence_regions":[{"location":"Agent Guardrails","category":"guardrails","outcome":"preserved","explicit_opt_in":false},{"location":"Escalation - Ask the User When","category":"escalation","outcome":"preserved","explicit_opt_in":false}],"measured_at":"2026-08-31"}
+  ]
+}

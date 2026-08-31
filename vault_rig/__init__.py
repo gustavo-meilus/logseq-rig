@@ -1,3 +1,3 @@
-"""Vault Rig."""
+"""Logseq Vault Rig."""
 
 __version__ = "0.1.0"

@@ -1,0 +1,12 @@
+{
+  "aiboarding_version": 2,
+  "canonical_file": "AGENTS.md",
+  "claude_wrapper": "CLAUDE.md",
+  "compression_level": "full",
+  "max_agents_md_lines": 220,
+  "max_agents_md_bytes": 24000,
+  "codex_project_doc_max_bytes": 32768,
+  "project_doc_fallback_filenames": [],
+  "ignored_paths": [],
+  "high_risk_paths": []
+}

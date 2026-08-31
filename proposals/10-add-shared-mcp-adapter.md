@@ -25,7 +25,7 @@ A vault may opt into an MCP server that delegates to the same `vault-rig` retrie
 - Keep write tools absent by default or scoped to explicit namespaces/operations with read-before-write safeguards if a later approved contract enables them.
 - Reuse the same vault discovery, validation, and named-query implementations rather than creating a second knowledge model.
 - Document client configuration and capability/approval boundaries.
-- Provide health/version information so clients can detect mismatched Vault Rig versions.
+- Provide health/version information so clients can detect mismatched Logseq Vault Rig versions.
 
 ## Out of Scope
 
@@ -49,11 +49,11 @@ A vault may opt into an MCP server that delegates to the same `vault-rig` retrie
 
 ## Migration / Rollout
 
-- Opt-in per vault/client after core Vault Rig is installed.
+- Opt-in per vault/client after core Logseq Vault Rig is installed.
 
 ## Validation
 
-- Contract tests compare MCP outputs with underlying `vault-rig` outputs; permission tests verify write operations are absent/denied by default; uninstall leaves core Vault Rig untouched.
+- Contract tests compare MCP outputs with underlying `vault-rig` outputs; permission tests verify write operations are absent/denied by default; uninstall leaves core Logseq Vault Rig untouched.
 
 ## Assumptions
 
@@ -61,7 +61,7 @@ A vault may opt into an MCP server that delegates to the same `vault-rig` retrie
 
 ## Material Decisions
 
-- Use MCP only to share an already-stable interface across clients, not as the internal architecture of Vault Rig.
+- Use MCP only to share an already-stable interface across clients, not as the internal architecture of Logseq Vault Rig.
 
 ## Open Questions
 

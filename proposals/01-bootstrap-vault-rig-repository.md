@@ -9,22 +9,22 @@
 
 ## Intent
 
-Create the repository foundation for `vault-rig`, whose managed payload can be applied to existing Logseq OG vault repositories without making the `vault-rig` repository itself a knowledge vault.
+Create the repository foundation for `logseq-vrig`, whose managed payload can be applied to existing Logseq OG vault repositories without making the `logseq-vrig` repository itself a knowledge vault.
 
 ## Current / Problem
 
-The Vault Rig architecture exists as a design, but there is no dedicated `vault-rig` repository defining which files are portable payload, which files are development-only, or what ownership boundaries an installer must respect.
+The Logseq Vault Rig architecture exists as a design, but there is no dedicated `logseq-vrig` repository defining which files are portable payload, which files are development-only, or what ownership boundaries an installer must respect.
 
 ## Desired Behavior
 
-The repository exposes a clear Vault Rig managed payload, development/test area, version metadata, and stable entrypoints so later changes can add installer, retrieval, validation, and Codex behavior without coupling them to one personal vault.
+The repository exposes a clear Logseq Vault Rig managed payload, development/test area, version metadata, and stable entrypoints so later changes can add installer, retrieval, validation, and Codex behavior without coupling them to one personal vault.
 
 ## In Scope
 
-- Define top-level repository boundaries for the Vault Rig managed payload, development/test assets, documentation, and release metadata.
+- Define top-level repository boundaries for the Logseq Vault Rig managed payload, development/test assets, documentation, and release metadata.
 - Reserve a namespaced managed directory inside target vaults (for example `.vault-rig/`) for implementation-owned files.
 - Define locations for the repository-local Codex Skill and Codex hook/config payload that later installer changes can manage.
-- Document that target vault `pages/`, `journals/`, `assets/`, and `logseq/config.edn` are user/vault-owned, not Vault Rig-owned.
+- Document that target vault `pages/`, `journals/`, `assets/`, and `logseq/config.edn` are user/vault-owned, not Logseq Vault Rig-owned.
 - Expose a single documented bootstrap/entry command location for later lifecycle operations.
 
 ## Out of Scope
@@ -35,15 +35,15 @@ The repository exposes a clear Vault Rig managed payload, development/test area,
 
 ## Acceptance Cases
 
-- A fresh clone clearly identifies Vault Rig-managed files versus target-vault-owned files.
-- No Vault Rig managed payload path collides with canonical Logseq knowledge directories.
-- The repository can evolve without requiring personal vault content to be committed into the `vault-rig` repository.
+- A fresh clone clearly identifies Logseq Vault Rig-managed files versus target-vault-owned files.
+- No Logseq Vault Rig managed payload path collides with canonical Logseq knowledge directories.
+- The repository can evolve without requiring personal vault content to be committed into the `logseq-vrig` repository.
 - A contributor can identify where installer payload, tests, Skills, hooks, and docs belong from repository documentation alone.
 
 ## Constraints / Preservation
 
 - Markdown in target Logseq OG vaults remains canonical knowledge.
-- Vault Rig core must be usable without Logseq DB, semantic indexing, or MCP.
+- Logseq Vault Rig core must be usable without Logseq DB, semantic indexing, or MCP.
 - Avoid speculative infrastructure; only reserve boundaries needed by the known roadmap.
 
 ## Migration / Rollout
@@ -52,17 +52,17 @@ The repository exposes a clear Vault Rig managed payload, development/test area,
 
 ## Validation
 
-- Repository structure can be checked by a deterministic layout test that fails on missing required Vault Rig boundaries or forbidden canonical-vault content.
+- Repository structure can be checked by a deterministic layout test that fails on missing required Logseq Vault Rig boundaries or forbidden canonical-vault content.
 
 ## Assumptions
 
-- The `vault-rig` repository will be version-controlled independently from individual vault repositories.
+- The `logseq-vrig` repository will be version-controlled independently from individual vault repositories.
 
 ## Material Decisions
 
-- Use one reusable `vault-rig` repository rather than copying an unstructured collection of files manually between vaults.
-- Keep vault-owned knowledge and Vault Rig-owned implementation separate.
+- Use one reusable `logseq-vrig` repository rather than copying an unstructured collection of files manually between vaults.
+- Keep vault-owned knowledge and Logseq Vault Rig-owned implementation separate.
 
 ## Open Questions
 
-- Repository name is fixed as `vault-rig`; the license remains a repository-owner decision.
+- Repository name is fixed as `logseq-vrig`; the license remains a repository-owner decision.

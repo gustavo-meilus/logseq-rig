@@ -1,0 +1,26 @@
+{
+  "checks": [
+    "check-preservation",
+    "check-size-budget"
+  ],
+  "details": {
+    "bytes_after": 3806,
+    "bytes_before": 3806,
+    "level": "full",
+    "lines_after": 51,
+    "lines_before": 51,
+    "preservation": "pass",
+    "size": "pass",
+    "tokens_after": 952,
+    "tokens_before": 952
+  },
+  "outcome": "pass",
+  "record_id": "compression-verification-2026-08-31",
+  "repository": {
+    "head": "e4172aebcc1b7f5a0f47b972865c31872645dcd3",
+    "identity": "git:e4172aebcc1b7f5a0f47b972865c31872645dcd3"
+  },
+  "schema_version": 1,
+  "subject": "AGENTS.md",
+  "type": "compression-verification"
+}

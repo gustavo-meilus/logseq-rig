@@ -1,0 +1,30 @@
+{
+  "checks": [
+    "wrapper",
+    "preservation",
+    "size",
+    "audit",
+    "commands"
+  ],
+  "details": {
+    "subjects": [
+      "AGENTS.md",
+      "CLAUDE.md",
+      ".aiboarding"
+    ],
+    "validators": [
+      "check-preservation",
+      "check-size-budget",
+      "audit-onboarding-evidence"
+    ]
+  },
+  "outcome": "pass",
+  "record_id": "onboarding-validation-2026-08-31",
+  "repository": {
+    "head": "e4172aebcc1b7f5a0f47b972865c31872645dcd3",
+    "identity": "git:e4172aebcc1b7f5a0f47b972865c31872645dcd3"
+  },
+  "schema_version": 1,
+  "subject": "agent-onboarding",
+  "type": "onboarding-validation"
+}

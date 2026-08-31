@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Runtime-neutral onboarding layout and subagent-pointer decisions.
+set -euo pipefail
+
+project=""
+event=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --project) project="$2"; shift 2 ;;
+    --event) event="$2"; shift 2 ;;
+    *) printf 'usage: %s --project DIR --event session-start|subagent-start\n' "$0" >&2; exit 64 ;;
+  esac
+done
+
+json_string() {
+  local value="$1"
+  value="${value//\\/\\\\}"
+  value="${value//\"/\\\"}"
+  printf '"%s"' "$value"
+}
+
+emit() {
+  printf '{"route":'; json_string "$1"; printf ',"context":'; json_string "$2"; printf '}\n'
+}
+
+agents="$project/AGENTS.md"
+legacy="$project/AIBOARDING.md"
+case "$event" in
+  session-start)
+    if [ -f "$agents" ]; then
+      emit valid ""
+    elif [ -f "$legacy" ]; then
+      emit legacy '<aiboarding-legacy>Legacy AIBOARDING.md layout detected. Run the migrate-aiboarding skill to move to standard AGENTS.md onboarding.</aiboarding-legacy>'
+    else
+      emit missing '<aiboarding-missing>No AGENTS.md found in this repo. Offer to run the create-agent-onboarding skill.</aiboarding-missing>'
+    fi
+    ;;
+  subagent-start)
+    if [ -f "$agents" ]; then
+      emit pointer '<aiboarding-pointer>Project onboarding: read AGENTS.md at repo root before working. Its "Agent Guardrails", "Known Failure Modes", and "Verification Before Completion" sections are binding.</aiboarding-pointer>'
+    else
+      emit absent ""
+    fi
+    ;;
+  *) printf 'unknown lifecycle event: %s\n' "$event" >&2; exit 64 ;;
+esac

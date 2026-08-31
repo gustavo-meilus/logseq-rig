@@ -1,0 +1,211 @@
+#!/usr/bin/env bash
+# aiboarding tool: deterministic onboarding audit.
+# Usage: audit-onboarding-evidence <repository-root> [--codex-project-doc-max-bytes <bytes>]
+set -euo pipefail
+
+if [ "$#" -ne 1 ] && [ "$#" -ne 3 ]; then
+  echo "usage: audit-onboarding-evidence <repository-root> [--codex-project-doc-max-bytes <bytes>]" >&2
+  exit 2
+fi
+
+if [ ! -d "$1" ]; then
+  echo "usage: audit-onboarding-evidence <repository-root> [--codex-project-doc-max-bytes <bytes>]" >&2
+  exit 2
+fi
+root="$(cd "$1" && pwd)"
+explicit_limit=""
+if [ "$#" -eq 3 ]; then
+  [ "$2" = --codex-project-doc-max-bytes ] || { echo "audit-onboarding-evidence: unknown option $2" >&2; exit 2; }
+  explicit_limit="$3"
+fi
+tool_dir="$(cd "$(dirname "$0")" && pwd)"
+size_tool="$tool_dir/check-size-budget"
+[ -x "$size_tool" ] || [ -f "$size_tool" ] || { echo "audit-onboarding-evidence: check-size-budget unavailable" >&2; exit 2; }
+failed=0
+
+config_value() {
+  local key="$1" config="$root/.aiboarding/config.json"
+  [ -f "$config" ] || return 1
+  sed -n "s/.*\"$key\"[[:space:]]*:[[:space:]]*\([^,}]*\).*/\1/p" "$config" | head -n 1 | tr -d '[:space:]'
+}
+
+config_fallbacks() {
+  local config="$root/.aiboarding/config.json"
+  [ -f "$config" ] || return 0
+  sed -n '/"project_doc_fallback_filenames"[[:space:]]*:/,/]/p' "$config" | grep -o '"[^"]*"' | sed '1d;s/"//g'
+}
+
+numeric_limit() {
+  [[ "$1" =~ ^[1-9][0-9]*$ ]]
+}
+
+configured_limit="$(config_value codex_project_doc_max_bytes || true)"
+legacy_limit="$(config_value strict_max_bytes || true)"
+if [ -n "$explicit_limit" ]; then
+  runtime_limit="$explicit_limit"; limit_source="explicit"
+elif [ -n "$configured_limit" ]; then
+  runtime_limit="$configured_limit"; limit_source="configured"
+elif [ -n "$legacy_limit" ]; then
+  runtime_limit="$legacy_limit"; limit_source="legacy strict_max_bytes"
+else
+  runtime_limit=32768; limit_source="Codex default"
+fi
+numeric_limit "$runtime_limit" || { echo "audit-onboarding-evidence: invalid Codex project document limit" >&2; exit 2; }
+mapfile -t fallback_names < <(config_fallbacks)
+
+emit() {
+  # severity|provenance|category|location|message
+  printf '%s|computed|%s|%s|%s\n' "$1" "$2" "$3" "$4"
+  [ "$1" != FAIL ] || failed=1
+}
+
+relative() { printf '%s' "${1#"$root"/}"; }
+
+check_size() {
+  local file="$1" out rc line severity message
+  set +e
+  out="$(bash "$size_tool" "$file" 2>&1)"
+  rc=$?
+  set -e
+  [ "$rc" -ne 2 ] || { echo "audit-onboarding-evidence: cannot inspect $(relative "$file")" >&2; exit 2; }
+  while IFS= read -r line; do
+    case "$line" in
+      FAIL:*) severity=FAIL ;;
+      WARN:*) severity=WARN ;;
+      *) continue ;;
+    esac
+    message="${line#*: }"
+    emit "$severity" size-budget "$(relative "$file"):1" "$message"
+  done <<< "$out"
+}
+
+check_wrapper() {
+  local file="$root/CLAUDE.md" line=0 open_id="" marker id begin_re end_re
+  begin_re='^[[:space:]]*<!--[[:space:]]aiboarding-begin:([^[:space:]>]+)[[:space:]]-->[[:space:]]*$'
+  end_re='^[[:space:]]*<!--[[:space:]]aiboarding-end:([^[:space:]>]+)[[:space:]]-->[[:space:]]*$'
+  [ -f "$file" ] || return 0
+  if ! tr -d '\r' < "$file" | grep -qx '@AGENTS.md'; then
+    emit FAIL wrapper-integrity 'CLAUDE.md:1' 'missing required @AGENTS.md import'
+  fi
+  while IFS= read -r marker; do
+    line=$((line + 1))
+    if [[ "$marker" =~ $begin_re ]]; then
+      id="${BASH_REMATCH[1]}"
+      if [ -n "$open_id" ]; then
+        emit FAIL wrapper-integrity "CLAUDE.md:$line" "nested aiboarding marker $id inside $open_id"
+      else
+        open_id="$id"
+      fi
+    elif [[ "$marker" =~ $end_re ]]; then
+      id="${BASH_REMATCH[1]}"
+      if [ -z "$open_id" ]; then
+        emit FAIL wrapper-integrity "CLAUDE.md:$line" "unmatched aiboarding end marker $id"
+      elif [ "$open_id" != "$id" ]; then
+        emit FAIL wrapper-integrity "CLAUDE.md:$line" "aiboarding end marker $id does not match $open_id"
+        open_id=""
+      else
+        open_id=""
+      fi
+    fi
+  done < "$file"
+  [ -z "$open_id" ] || emit FAIL wrapper-integrity 'CLAUDE.md:EOF' "unclosed aiboarding marker $open_id"
+}
+
+has_script() {
+  local manifest="$1" script="$2"
+  awk -v script="$script" '
+    /"scripts"[[:space:]]*:/ { in_scripts=1 }
+    in_scripts && $0 ~ "\"" script "\"[[:space:]]*:" { found=1 }
+    in_scripts && /}/ { exit }
+    END { exit !found }
+  ' "$manifest"
+}
+
+check_command() {
+  local text="$1" file="$2" line="$3" cmd target manifest makefile
+  case "$text" in
+    bash\ *|sh\ *)
+      target="${text#* }"
+      target="${target%% *}"
+      case "$target" in
+        /*|../*|*/../*|.. ) ;;
+        */*) [ -e "$root/$target" ] || emit FAIL stale-command "$(relative "$file"):$line" "missing command path $target" ;;
+      esac
+      ;;
+    ./*|[^/]*/*)
+      target="${text%% *}"
+      case "$target" in
+        ../*|*/../*) ;;
+        *) [ -e "$root/$target" ] || emit FAIL stale-command "$(relative "$file"):$line" "missing command path $target" ;;
+      esac
+      ;;
+    npm\ run\ *|pnpm\ run\ *|yarn\ run\ *)
+      cmd="${text##* run }"; manifest="$root/package.json"
+      [[ "$cmd" =~ ^[A-Za-z0-9_.:-]+$ ]] || return
+      [ -f "$manifest" ] && has_script "$manifest" "$cmd" || emit FAIL stale-command "$(relative "$file"):$line" "missing package script $cmd"
+      ;;
+    make\ *)
+      target="${text#make }"; makefile=""
+      [[ "$target" =~ ^[A-Za-z0-9_.-]+$ ]] || return
+      for manifest in Makefile makefile GNUmakefile; do [ -f "$root/$manifest" ] && { makefile="$root/$manifest"; break; }; done
+      [ -n "$makefile" ] && grep -Eq "^${target//./\\.}[[:space:]]*:" "$makefile" || emit FAIL stale-command "$(relative "$file"):$line" "missing make target $target"
+      ;;
+    just\ *)
+      target="${text#just }"; manifest="$root/justfile"
+      [[ "$target" =~ ^[A-Za-z0-9_.-]+$ ]] || return
+      [ -f "$manifest" ] && grep -Eq "^${target//./\\.}([[:space:]]|:)" "$manifest" || emit FAIL stale-command "$(relative "$file"):$line" "missing just target $target"
+      ;;
+  esac
+}
+
+check_commands() {
+  local file="$1" line=0 content text
+  while IFS= read -r content || [ -n "$content" ]; do
+    line=$((line + 1))
+    while [[ "$content" =~ \`([^\`]+)\` ]]; do
+      text="${BASH_REMATCH[1]}"
+      check_command "$text" "$file" "$line"
+      content="${content#*\`$text\`}"
+    done
+  done < "$file"
+}
+
+selected_instruction() {
+  local dir="$1" name
+  for name in AGENTS.override.md AGENTS.md "${fallback_names[@]}"; do
+    [ -n "$name" ] && [ -f "$dir/$name" ] && [ -s "$dir/$name" ] && { printf '%s\n' "$dir/$name"; return; }
+  done
+  return 0
+}
+
+check_chain() {
+  local endpoint dir selected total=0 next chain="" part bytes
+  endpoint="$1"
+  dir="$endpoint"
+  while :; do
+    selected="$(selected_instruction "$dir")"
+    if [ -n "$selected" ]; then
+      bytes="$(wc -c < "$selected")"; bytes="${bytes//[[:space:]]/}"
+      total=$((total + bytes))
+      part="$(relative "$selected") ($bytes bytes)"
+      chain="${part}${chain:+, $chain}"
+    fi
+    [ "$dir" = "$root" ] && break
+    next="$(dirname "$dir")"
+    [ "$next" = "$dir" ] && break
+    dir="$next"
+  done
+  [ -n "$chain" ] || return
+  [ "$total" -le "$runtime_limit" ] || emit FAIL codex-project-doc-budget "$(relative "$endpoint"):1" "endpoint $(relative "$endpoint"); chain $chain; total $total bytes > limit $runtime_limit bytes ($limit_source)"
+}
+
+mapfile -d '' audit_files < <(find "$root" \( -path "$root/.git" -o -path "$root/tests/fixtures" \) -prune -o -type f \( -name AGENTS.md -o -name CLAUDE.md -o -path '*/.claude/rules/*.md' \) -print0)
+for file in "${audit_files[@]}"; do
+  check_size "$file"
+  check_commands "$file"
+done
+mapfile -d '' instruction_dirs < <(find "$root" \( -path "$root/.git" -o -path "$root/tests/fixtures" \) -prune -o -type f \( -name AGENTS.override.md -o -name AGENTS.md $(for name in "${fallback_names[@]}"; do printf -- '-o -name %q ' "$name"; done) \) -size +0c -printf '%h\0' | sort -zu)
+for dir in "${instruction_dirs[@]}"; do check_chain "$dir"; done
+check_wrapper
+
+exit "$failed"

@@ -1,6 +1,6 @@
-# Vault Rig Proposal Contracts for Logseq OG + Codex
+# Logseq Vault Rig Proposal Contracts for Logseq OG + Codex
 
-This package contains a decomposed series of normalized OpenSpec change contracts for creating `vault-rig`, a reusable installable tooling and control layer for Logseq OG vault folders with Codex integration.
+This package contains a decomposed series of normalized OpenSpec change contracts for creating `logseq-vrig`, a reusable installable tooling and control layer for Logseq OG vault folders with Codex integration.
 
 These are **not yet OpenSpec change artifacts**. The supplied `openspec-brainstorming` workflow requires explicit approval of each normalized contract before `openspec new change` is run. No initialized OpenSpec root/store was supplied and the OpenSpec CLI was not available in the current execution environment, so generating fake schema-specific artifacts would violate the workflow.
 

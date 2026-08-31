@@ -17,7 +17,7 @@ For this repository Markdown is the database. Generic linting is insufficient, w
 
 ## Desired Behavior
 
-Vault Rig can cheaply validate changed graph content during iteration and run an authoritative graph-wide check for high-risk operations, producing actionable machine-readable failures.
+Logseq Vault Rig can cheaply validate changed graph content during iteration and run an authoritative graph-wide check for high-risk operations, producing actionable machine-readable failures.
 
 ## In Scope
 

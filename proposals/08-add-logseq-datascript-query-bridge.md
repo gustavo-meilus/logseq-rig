@@ -23,7 +23,7 @@ When Logseq OG's supported local API is available, `vault-rig query` can execute
 
 - Detect live Logseq OG API availability without making it a core install prerequisite.
 - Expose `vault-rig query <named-query> [args]`.
-- Support a versioned query library stored with the Vault Rig/vault configuration.
+- Support a versioned query library stored with the Logseq Vault Rig/vault configuration.
 - Allow experimental raw query execution only through an explicit advanced surface if retained by design.
 - Normalize query results with page/block UUID/source evidence where available.
 - Define a promotion procedure: draft query -> run/inspect -> verify on fixtures/real cases -> register as named query.
@@ -51,7 +51,7 @@ When Logseq OG's supported local API is available, `vault-rig query` can execute
 
 ## Migration / Rollout
 
-- Feature can be enabled per vault after core Vault Rig install; no knowledge migration.
+- Feature can be enabled per vault after core Logseq Vault Rig install; no knowledge migration.
 
 ## Validation
 
@@ -63,7 +63,7 @@ When Logseq OG's supported local API is available, `vault-rig query` can execute
 
 ## Material Decisions
 
-- Named verified queries are durable Vault Rig assets; Codex composes new Datalog mainly for novel exploration, then promotes repeated useful queries.
+- Named verified queries are durable Logseq Vault Rig assets; Codex composes new Datalog mainly for novel exploration, then promotes repeated useful queries.
 
 ## Open Questions
 

@@ -1,0 +1,7 @@
+{
+  "description": "Bounded Logseq Vault Rig lifecycle checks.",
+  "hooks": {
+    "SessionStart": [{"matcher": "startup|resume", "hooks": [{"type": "command", "command": "python .codex/hooks/session_start.py", "additionalContextLimit": 500}]}],
+    "Stop": [{"hooks": [{"type": "command", "command": "python .codex/hooks/stop.py", "timeout": 30}]}]
+  }
+}

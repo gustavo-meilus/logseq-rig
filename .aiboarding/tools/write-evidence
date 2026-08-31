@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# aiboarding tool: validate and atomically retain one compact lifecycle record.
+# Usage: write-evidence --project DIR --record FILE
+set -euo pipefail
+
+project="" record=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --project) project="$2"; shift 2 ;;
+    --record) record="$2"; shift 2 ;;
+    *) echo "usage: $0 --project DIR --record FILE" >&2; exit 64 ;;
+  esac
+done
+[ -d "$project" ] && [ -f "$record" ] || { echo "write-evidence: project and record are required" >&2; exit 64; }
+command -v python3 >/dev/null 2>&1 || { echo "write-evidence: python3 is required" >&2; exit 2; }
+
+canonical="$(mktemp "${TMPDIR:-/tmp}/aiboarding-evidence.XXXXXX")"
+trap 'rm -f "$canonical"' EXIT
+python3 - "$record" "$canonical" <<'PY'
+import json, re, sys
+
+source, output = sys.argv[1:]
+try:
+    value = json.load(open(source, encoding="utf-8"))
+except (OSError, json.JSONDecodeError) as error:
+    raise SystemExit(f"write-evidence: invalid JSON: {error}")
+
+top = {"schema_version", "record_id", "type", "outcome", "repository", "subject", "checks", "details"}
+types = {
+    "drift-classification": {"disposition", "paths", "sections"},
+    "onboarding-validation": {"subjects", "validators"},
+    "compression-verification": {"level", "bytes_before", "bytes_after", "lines_before", "lines_after", "tokens_before", "tokens_after", "preservation", "size"},
+    "live-runtime-verification": {"runtime", "version", "protocol", "verdict", "evidence"},
+}
+outcomes = {"pass", "fail", "incomplete", "degraded", "unavailable"}
+if not isinstance(value, dict) or set(value) - top:
+    raise SystemExit("write-evidence: unknown top-level field")
+if value.get("schema_version") != 1 or not all(isinstance(value.get(k), str) and value[k] for k in ("record_id", "type", "outcome")):
+    raise SystemExit("write-evidence: missing identity, type, or outcome")
+if value["type"] not in types or value["outcome"] not in outcomes:
+    raise SystemExit("write-evidence: unsupported type or outcome")
+repository = value.get("repository")
+if not isinstance(repository, dict) or set(repository) - {"identity", "base", "head"} or not isinstance(repository.get("identity"), str) or not isinstance(repository.get("head"), str):
+    raise SystemExit("write-evidence: repository identity and head are required")
+if "base" in repository and not isinstance(repository["base"], str):
+    raise SystemExit("write-evidence: invalid base commit")
+details = value.get("details", {})
+if not isinstance(details, dict) or set(details) - types[value["type"]]:
+    raise SystemExit("write-evidence: unknown detail field")
+if "checks" in value and not isinstance(value["checks"], list):
+    raise SystemExit("write-evidence: checks must be an array")
+if "subject" in value and not isinstance(value["subject"], str):
+    raise SystemExit("write-evidence: subject must be a string")
+
+def safe(item, key=""):
+    if isinstance(item, dict):
+        return all(safe(v, k) for k, v in item.items())
+    if isinstance(item, list):
+        return all(safe(v, key) for v in item)
+    if not isinstance(item, str):
+        return True
+    return not (re.search(r"(?i)(token|secret|password|authorization|prompt|stdout|stderr|environment|raw[_-]?log)", key)
+                or re.search(r"(?i)(bearer\\s+|api[_-]?key|token|secret|password)\\s*[:=]", item)
+                or re.match(r"^(?:[A-Za-z]:[\\/]|/)", item))
+if not safe(value):
+    raise SystemExit("write-evidence: sensitive content or local absolute path")
+open(output, "w", encoding="utf-8").write(json.dumps(value, sort_keys=True, indent=2) + "\n")
+PY
+
+filename="$(printf '%s' "$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["record_id"])' "$canonical")" | git -C "$project" hash-object --stdin)" || { echo "write-evidence: Git object hashing failed" >&2; exit 2; }
+dest="$project/.aiboarding/evidence/v1/$filename.json"
+mkdir -p "${dest%/*}" || { echo "write-evidence: cannot create evidence directory" >&2; exit 2; }
+if [ -e "$dest" ]; then
+  cmp -s "$canonical" "$dest" && { printf '%s\n' "$dest"; exit 0; }
+  echo "write-evidence: conflicting record identity" >&2; exit 1
+fi
+tmp="${dest%/*}/.$filename.$$.tmp"
+umask 077
+cp "$canonical" "$tmp" || { rm -f "$tmp"; echo "write-evidence: write failed" >&2; exit 2; }
+if ! ln "$tmp" "$dest" 2>/dev/null; then
+  rm -f "$tmp"
+  [ -e "$dest" ] && cmp -s "$canonical" "$dest" && { printf '%s\n' "$dest"; exit 0; }
+  echo "write-evidence: record already exists or cannot be installed" >&2; exit 1
+fi
+rm -f "$tmp"
+printf '%s\n' "$dest"

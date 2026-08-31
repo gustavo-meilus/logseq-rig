@@ -9,20 +9,20 @@
 
 ## Intent
 
-Make Vault Rig itself verifiable by adding representative disposable Logseq OG fixture vaults and an authoritative release check for install, retrieval, validation, update, and uninstall behavior.
+Make Logseq Vault Rig itself verifiable by adding representative disposable Logseq OG fixture vaults and an authoritative release check for install, retrieval, validation, update, and uninstall behavior.
 
 ## Current / Problem
 
-Vault Rig can appear correct in one personal vault while failing on aliases, namespaces, custom directories, block references, or pre-existing user configuration. Without fixture vaults, installer and parser regressions are difficult to detect independently.
+Logseq Vault Rig can appear correct in one personal vault while failing on aliases, namespaces, custom directories, block references, or pre-existing user configuration. Without fixture vaults, installer and parser regressions are difficult to detect independently.
 
 ## Desired Behavior
 
-Contributors can run one stable validation entrypoint that installs the current Vault Rig build into disposable fixture vaults, exercises supported behavior, and proves idempotence/non-destructive lifecycle guarantees before release.
+Contributors can run one stable validation entrypoint that installs the current Logseq Vault Rig build into disposable fixture vaults, exercises supported behavior, and proves idempotence/non-destructive lifecycle guarantees before release.
 
 ## In Scope
 
 - Create minimal fixture vaults for default layout, custom directories/journal format, aliases/namespaces, nested blocks/properties, block IDs/references, assets, and existing user `AGENTS.md`/Codex config where relevant.
-- Provide a cheap targeted check and an authoritative full Vault Rig check.
+- Provide a cheap targeted check and an authoritative full Logseq Vault Rig check.
 - Verify install twice, doctor, update simulation, retrieval commands, graph checks, and uninstall against fixtures.
 - Verify canonical fixture content hashes remain unchanged by install/uninstall except fixtures explicitly used to test Codex write behavior.
 - Make release validation runnable locally and in CI when a CI provider is later configured.
@@ -35,10 +35,10 @@ Contributors can run one stable validation entrypoint that installs the current 
 
 ## Acceptance Cases
 
-- One command produces pass/fail evidence for the supported Vault Rig lifecycle.
+- One command produces pass/fail evidence for the supported Logseq Vault Rig lifecycle.
 - A regression in path resolution, alias/context parsing, UUID checks, lifecycle idempotence, or ownership cleanup is caught by a fixture test.
 - Fixture data is synthetic and safe to publish.
-- Tests do not pass by weakening or deleting failing fixture expectations during normal Vault Rig operation.
+- Tests do not pass by weakening or deleting failing fixture expectations during normal Logseq Vault Rig operation.
 
 ## Constraints / Preservation
 
@@ -48,7 +48,7 @@ Contributors can run one stable validation entrypoint that installs the current 
 
 ## Migration / Rollout
 
-- This becomes the gate for tagging/releasing Vault Rig versions; exact CI hosting is a later repository choice.
+- This becomes the gate for tagging/releasing Logseq Vault Rig versions; exact CI hosting is a later repository choice.
 
 ## Validation
 
@@ -56,7 +56,7 @@ Contributors can run one stable validation entrypoint that installs the current 
 
 ## Assumptions
 
-- Verification is part of the product: a portable Vault Rig installation is not complete until install/update/uninstall and graph invariants are reproducibly tested.
+- Verification is part of the product: a portable Logseq Vault Rig installation is not complete until install/update/uninstall and graph invariants are reproducibly tested.
 
 ## Material Decisions
 

@@ -1,14 +1,14 @@
-# Vault Rig: Logseq OG + Codex Proposal Series
+# Logseq Vault Rig: Logseq OG + Codex Proposal Series
 
-This series decomposes the `vault-rig` project into focused OpenSpec change contracts. It follows the supplied OpenSpec Brainstorming workflow: one clear intent per change, explicit scope and preservation rules, proportional rigor, and an approval gate before creating actual OpenSpec change artifacts.
+This series decomposes the `logseq-vrig` project into focused OpenSpec change contracts. It follows the supplied OpenSpec Brainstorming workflow: one clear intent per change, explicit scope and preservation rules, proportional rigor, and an approval gate before creating actual OpenSpec change artifacts.
 
 ## Current evidence and boundaries
 
-- The target system is `vault-rig`, a reusable tooling and control layer installed into existing Logseq OG vault folders without changing the vault's canonical knowledge model.
+- The target system is `logseq-vrig`, a reusable tooling and control layer installed into existing Logseq OG vault folders without changing the vault's canonical knowledge model.
 - Canonical knowledge remains the existing Logseq OG Markdown under the vault's configured pages/journals directories.
 - Git remains history and rollback.
 - Codex is the reasoning/operator layer; deterministic scripts validate structure and route retrieval.
-- Vault Rig core must not require Logseq DB, a vector database, MCP, or a second authoritative data store.
+- Logseq Vault Rig core must not require Logseq DB, a vector database, MCP, or a second authoritative data store.
 - The actual target vault has not been inspected in this proposal package. Vault-specific conventions therefore remain runtime-discovered or explicit configuration, not hardcoded assumptions.
 - The OpenSpec CLI was not available in the current execution environment and no initialized OpenSpec project/store was supplied. In accordance with the brainstorming workflow, this package contains normalized contracts ready for approval rather than fabricated OpenSpec change artifacts.
 
@@ -24,7 +24,7 @@ This series decomposes the `vault-rig` project into focused OpenSpec change cont
 6. `add-codex-vault-rig-integration`
 7. `add-vault-rig-fixtures-and-release-validation`
 
-This release is sufficient to install Vault Rig into multiple vaults, search and inspect the graph safely, edit under Codex with repository-local guidance, and verify graph integrity.
+This release is sufficient to install Logseq Vault Rig into multiple vaults, search and inspect the graph safely, edit under Codex with repository-local guidance, and verify graph integrity.
 
 ### Release 0.2 - Native structural query integration
 
@@ -65,7 +65,7 @@ bootstrap-vault-rig-repository
 
 ## Approval and OpenSpec handoff
 
-Approve each contract independently. After approval, create the corresponding OpenSpec change in the initialized `vault-rig` repository and let the active OpenSpec schema/instructions determine artifact structure.
+Approve each contract independently. After approval, create the corresponding OpenSpec change in the initialized `logseq-vrig` repository and let the active OpenSpec schema/instructions determine artifact structure.
 
 Typical CLI flow after an OpenSpec root exists:
 

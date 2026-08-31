@@ -13,11 +13,11 @@ Add deterministic discovery of a target Logseq OG vault and its relevant on-disk
 
 ## Current / Problem
 
-Vault Rig cannot safely assume `pages/`, `journals/`, page filename encoding, or journal filename format. Logseq OG configuration can change these conventions, and logical page names do not always equal filesystem paths.
+Logseq Vault Rig cannot safely assume `pages/`, `journals/`, page filename encoding, or journal filename format. Logseq OG configuration can change these conventions, and logical page names do not always equal filesystem paths.
 
 ## Desired Behavior
 
-Given a target folder, Vault Rig either returns a normalized vault descriptor derived from Logseq configuration and filesystem evidence or fails clearly without modifying the folder.
+Given a target folder, Logseq Vault Rig either returns a normalized vault descriptor derived from Logseq configuration and filesystem evidence or fails clearly without modifying the folder.
 
 ## In Scope
 
