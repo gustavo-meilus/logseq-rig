@@ -1,0 +1,8 @@
+[project]
+name = "vault-rig"
+version = "0.1.0"
+description = "Portable tooling for a managed Logseq vault area"
+requires-python = ">=3.11"
+
+[tool.unittest]
+start-directory = "tests"
