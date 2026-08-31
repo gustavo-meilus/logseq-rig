@@ -1,7 +1,22 @@
 # Logseq Vault Rig
 
-Logseq Vault Rig is a portable, Python 3.11+ tool for managing the `.vault-rig/`
-area of a Logseq OG vault. Git is required for the planned history features.
+**Agents can work here. Markdown stays in charge.**
+
+Logseq Vault Rig is a stdlib-only local control layer for Logseq OG graphs.
+It discovers a graph's real file conventions, retrieves exact evidence from
+Markdown and Git, installs a bounded Codex layer, and checks graph integrity
+without introducing a second knowledge store.
+
+Editing a Logseq graph safely is not the same as editing arbitrary Markdown.
+Graph drift is a change that looks reasonable as Markdown but breaks something
+Logseq depends on: a persisted block identity, block reference, asset path,
+configured directory, filename convention, or another graph invariant.
+
+Vault Rig is for local, file-first Logseq OG graphs. Core retrieval and
+integrity checks work with Logseq closed. It is not a hosted knowledge service,
+Logseq UI plugin, semantic retrieval engine, MCP server, or second knowledge
+store. Its optional DataScript bridge remains local, named-query-only, and
+read-only.
 
 ## Repository layout
 
@@ -23,12 +38,23 @@ registry-specific configuration.
 python -m vault_rig --help
 python -m vault_rig --version
 python -m vault_rig --check-layout
+python -m vault_rig detect /path/to/vault
 python -m vault_rig install /path/to/vault --dry-run
 python -m vault_rig install /path/to/vault
+python -m vault_rig update /path/to/vault --dry-run
 python -m vault_rig doctor /path/to/vault
 python -m vault_rig uninstall /path/to/vault
 python -m vault_rig check /path/to/vault --all
 python -m vault_rig check /path/to/vault --changed
+python -m vault_rig status /path/to/vault
+python -m vault_rig resolve /path/to/vault Plan
+python -m vault_rig find /path/to/vault 'exact phrase'
+python -m vault_rig context /path/to/vault 'exact phrase'
+python -m vault_rig page /path/to/vault Plan
+python -m vault_rig block /path/to/vault <block-id>
+python -m vault_rig refs /path/to/vault Plan
+python -m vault_rig backlinks /path/to/vault Plan
+python -m vault_rig history /path/to/vault Plan
 python -m vault_rig query /path/to/vault page-by-name Plan
 ```
 

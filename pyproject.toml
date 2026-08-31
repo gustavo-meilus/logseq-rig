@@ -1,7 +1,7 @@
 [project]
 name = "logseq-vrig"
 version = "0.1.0"
-description = "Portable tooling for a managed Logseq vault area"
+description = "Local guardrails for AI-assisted Logseq OG graphs"
 requires-python = ">=3.11"
 
 [project.scripts]
