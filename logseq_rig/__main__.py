@@ -1,4 +1,4 @@
-"""Command-line entrypoint for Logseq Vault Rig."""
+"""Command-line entrypoint for Logseq Rig."""
 
 from __future__ import annotations
 
@@ -15,19 +15,19 @@ from .retrieval import RetrievalError, backlinks, block, context, find, history,
 from .datascript import QueryError, execute
 
 
-REQUIRED_PATHS = ("vault_rig", "payload", "tests/fixtures", "docs", ".agents/skills")
+REQUIRED_PATHS = ("logseq_rig", "payload", "tests/fixtures", "docs", ".agents/skills")
 FORBIDDEN_PATHS = ("payload/pages", "payload/journals", "payload/assets", "payload/logseq/config.edn")
 
 
 def check_layout(root: Path) -> list[str]:
     """Return deterministic layout-contract violations for *root*."""
     missing = [f"missing required path: {path}" for path in REQUIRED_PATHS if not (root / path).exists()]
-    forbidden = [f"forbidden vault-owned path: {path}" for path in FORBIDDEN_PATHS if (root / path).exists()]
+    forbidden = [f"forbidden graph-owned path: {path}" for path in FORBIDDEN_PATHS if (root / path).exists()]
     return missing + forbidden
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Manage Logseq Vault Rig project boundaries.")
+    parser = argparse.ArgumentParser(description="Manage Logseq Rig project boundaries.")
     parser.add_argument("--version", action="version", version=__version__)
     parser.add_argument("--check-layout", metavar="ROOT", nargs="?", const=".", help="validate a repository layout")
     parser.add_argument("command", nargs="?", choices=("detect", "install", "update", "doctor", "uninstall", "check", "status", "resolve", "find", "context", "page", "block", "refs", "backlinks", "history", "query"))
@@ -54,7 +54,7 @@ def main(argv: list[str] | None = None) -> int:
                 return 2
         if args.command == "check":
             if args.target is None or args.all == args.changed:
-                parser.error("check requires a vault folder and exactly one of --all or --changed")
+                parser.error("check requires a graph folder and exactly one of --all or --changed")
             try:
                 result = check(detect(Path(args.target)), "all" if args.all else "changed", tuple(args.expected_path))
                 print(json.dumps(result, sort_keys=True))
@@ -67,7 +67,7 @@ def main(argv: list[str] | None = None) -> int:
                 return 2
         if args.command in {"status", "resolve", "find", "context", "page", "block", "refs", "backlinks", "history", "query"}:
             if args.target is None:
-                parser.error(f"{args.command} requires a vault folder")
+                parser.error(f"{args.command} requires a graph folder")
             if args.command != "status" and args.query is None:
                 parser.error(f"{args.command} requires a query")
             try:

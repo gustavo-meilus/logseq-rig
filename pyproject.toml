@@ -1,11 +1,14 @@
 [project]
-name = "logseq-vrig"
-version = "1.0.0"
+name = "logseq-rig"
+version = "2.0.0"
 description = "Local guardrails for AI-assisted Logseq OG graphs"
 requires-python = ">=3.11"
 
 [project.scripts]
-vault-rig = "vault_rig.__main__:main"
+logseq-rig = "logseq_rig.__main__:main"
+
+[tool.setuptools]
+packages = ["logseq_rig"]
 
 [tool.unittest]
 start-directory = "tests"

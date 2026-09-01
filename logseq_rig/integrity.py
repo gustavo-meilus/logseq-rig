@@ -1,4 +1,4 @@
-"""Deterministic, read-only integrity checks for supported vault files."""
+"""Deterministic, read-only integrity checks for supported graph files."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from pathlib import Path
 import re
 import subprocess
 
-from .detection import VaultDescriptor
+from .detection import GraphDescriptor
 from .retrieval import BLOCK_REF, PROPERTY, load
 
 
@@ -56,7 +56,7 @@ def _finding(code: str, source: Location, message: str, related: list[Location] 
 
 
 def _controlled(root: Path) -> dict[str, set[str]]:
-    path = root / ".vault-rig" / "integrity.json"
+    path = root / ".logseq-rig" / "integrity.json"
     if not path.exists():
         return {}
     value = json.loads(path.read_text(encoding="utf-8"))
@@ -66,7 +66,7 @@ def _controlled(root: Path) -> dict[str, set[str]]:
     return {key: set(values) for key, values in rules.items()}
 
 
-def _changed(descriptor: VaultDescriptor) -> tuple[set[str], dict[str, set[str]]]:
+def _changed(descriptor: GraphDescriptor) -> tuple[set[str], dict[str, set[str]]]:
     root = Path(descriptor.root)
     try:
         tracked = subprocess.run(["git", "-C", str(root), "diff", "--name-only", "HEAD"], text=True, capture_output=True, check=True).stdout.splitlines()
@@ -83,7 +83,7 @@ def _changed(descriptor: VaultDescriptor) -> tuple[set[str], dict[str, set[str]]
     return changed, deleted
 
 
-def check(descriptor: VaultDescriptor, mode: str, expected_paths: tuple[str, ...] = ()) -> dict[str, object]:
+def check(descriptor: GraphDescriptor, mode: str, expected_paths: tuple[str, ...] = ()) -> dict[str, object]:
     """Return deterministic findings for *descriptor* without changing files."""
     root = Path(descriptor.root)
     pages = load(descriptor)

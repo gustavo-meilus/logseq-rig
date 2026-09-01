@@ -2,7 +2,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from vault_rig.release_validation import FIXTURES, _hashes, cli
+from logseq_rig.release_validation import FIXTURES, _hashes, cli
 
 
 class ReleaseValidationTests(unittest.TestCase):

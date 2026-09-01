@@ -4,7 +4,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from vault_rig.__main__ import FORBIDDEN_PATHS, REQUIRED_PATHS, main
+from logseq_rig.__main__ import FORBIDDEN_PATHS, REQUIRED_PATHS, main
 
 
 class CliTests(unittest.TestCase):

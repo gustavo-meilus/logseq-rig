@@ -2,12 +2,12 @@
 
 ## Purpose
 
-Provides small public fixture vaults and stable checks that prove supported Logseq Vault Rig lifecycle, retrieval, integrity, and Codex integration behavior before release.
+Provides small public fixture graphs and stable checks that prove supported Logseq Rig lifecycle, retrieval, integrity, and Codex integration behavior before release.
 
 ## Requirements
 
 ### Requirement: Fixtures cover supported behavior
-The project SHALL provide minimal synthetic fixtures for default layout, configured directories and journal format, aliases and namespaces, nested blocks and properties, persisted block references, assets, and pre-existing managed-boundary configuration.
+The project SHALL provide minimal synthetic graph fixtures for default layout, configured directories and journal format, aliases and namespaces, nested blocks and properties, persisted block references, assets, pre-existing managed-boundary configuration, and legacy managed-payload migration.
 
 #### Scenario: Fixture corpus is inspected
 - **WHEN** a contributor lists supported fixture scenarios
@@ -21,11 +21,11 @@ The project SHALL expose one cheap targeted verification entrypoint and one auth
 - **THEN** it exercises all supported fixture scenarios and returns a reliable pass or fail status
 
 ### Requirement: Lifecycle round trip is verified
-Full validation SHALL exercise install twice, doctor, update behavior, retrieval commands, integrity checks, and uninstall against clean disposable fixture copies.
+Full validation SHALL exercise install twice, doctor, update behavior, retrieval commands, integrity checks, and uninstall against clean disposable graph fixture copies, and SHALL exercise the supported legacy migration path.
 
 #### Scenario: Lifecycle round trip succeeds
 - **WHEN** full validation runs on a supported fixture
-- **THEN** installation is idempotent, supported commands pass, and uninstall removes only managed state
+- **THEN** installation is idempotent, supported commands pass, legacy migration preserves required behavior, and uninstall removes only managed state
 
 ### Requirement: Canonical and user-owned content is protected
 Validation SHALL compare content identities before and after lifecycle operations and SHALL fail if canonical fixture content or pre-existing user-owned configuration changes outside an explicit edit scenario.
@@ -42,8 +42,15 @@ Release checks SHALL use deterministic expectations independent of Codex semanti
 - **THEN** validation exits non-zero and identifies the scenario and mismatch
 
 ### Requirement: Core validation is offline
-The authoritative core validation SHALL run without private vault content or network access.
+The authoritative core validation SHALL run without private graph content or network access.
 
 #### Scenario: Network is unavailable
 - **WHEN** core release validation runs in a clean local environment
 - **THEN** all non-live supported scenarios remain executable
+
+### Requirement: Renamed interface and migration are release-validated
+The authoritative release check SHALL validate the installed `logseq-rig` interface, a fresh graph installation, and a clean legacy managed-payload migration without network access or private graph content.
+
+#### Scenario: Renamed release candidate is checked
+- **WHEN** authoritative release validation runs for the renamed release candidate
+- **THEN** it verifies the installed public command and both fresh-install and clean-migration lifecycle paths

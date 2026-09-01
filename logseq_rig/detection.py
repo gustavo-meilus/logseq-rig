@@ -1,4 +1,4 @@
-"""Read-only detection for supported Logseq OG file vaults."""
+"""Read-only detection for supported Logseq OG file graphs."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ class DetectionError(Exception):
 
 
 @dataclass(frozen=True)
-class VaultDescriptor:
+class GraphDescriptor:
     version: int
     root: str
     pages_directory: str
@@ -137,21 +137,21 @@ def _directory(root: Path, value: object, key: str) -> tuple[Path, str]:
     try:
         relative = candidate.relative_to(root)
     except ValueError as error:
-        raise DetectionError("path_escape", f"{key} escapes the selected vault") from error
+        raise DetectionError("path_escape", f"{key} escapes the selected graph") from error
     if not candidate.is_dir():
         raise DetectionError("missing_evidence", f"configured {key} directory is missing")
     return candidate, relative.as_posix()
 
 
-def detect(root: Path) -> VaultDescriptor:
+def detect(root: Path) -> GraphDescriptor:
     root = root.resolve()
     if not root.is_dir():
-        raise DetectionError("non_vault", "target folder does not exist")
+        raise DetectionError("non_graph", "target folder does not exist")
     if (root / "db.sqlite").exists():
         raise DetectionError("db_graph", "Logseq DB graphs are unsupported")
     config = root / "logseq" / "config.edn"
     if not config.is_file():
-        raise DetectionError("non_vault", "missing logseq/config.edn")
+        raise DetectionError("non_graph", "missing logseq/config.edn")
     try:
         values = EdnReader(config.read_text(encoding="utf-8")).read()
     except (OSError, UnicodeError, ValueError) as error:
@@ -168,7 +168,7 @@ def detect(root: Path) -> VaultDescriptor:
     if journal_format not in {"yyyy_MM_dd", "yyyy-MM-dd"}:
         raise DetectionError("unsupported_journal_format", "journal filename format is unsupported")
 
-    return VaultDescriptor(
+    return GraphDescriptor(
         version=1,
         root=str(root),
         pages_directory=pages,

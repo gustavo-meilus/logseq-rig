@@ -13,8 +13,8 @@ Supported retrieval commands SHALL return JSON or NDJSON data, write diagnostics
 - **WHEN** resolve cannot identify one supported logical page
 - **THEN** it returns a non-zero status and a machine-actionable diagnostic without emitting a false successful result
 
-### Requirement: Logical pages resolve through vault conventions
-Resolve SHALL map supported logical page names and reliably parsed aliases to canonical logical identity and actual source file using the detected vault descriptor.
+### Requirement: Logical pages resolve through graph conventions
+Resolve SHALL map supported logical page names and reliably parsed aliases to canonical logical identity and actual source file using the detected graph descriptor.
 
 #### Scenario: Logical name differs from filename
 - **WHEN** a supported logical page name maps to an encoded or otherwise different filename
@@ -24,7 +24,7 @@ Resolve SHALL map supported logical page names and reliably parsed aliases to ca
 Find SHALL locate supported literal text, page references, block references, persisted block UUIDs, properties, and task markers in configured knowledge files.
 
 #### Scenario: Persisted block UUID is searched
-- **WHEN** find receives a persisted UUID present in the vault
+- **WHEN** find receives a persisted UUID present in the graph
 - **THEN** it returns the containing file, line, logical page, and block evidence
 
 ### Requirement: Matches can be expanded to block context

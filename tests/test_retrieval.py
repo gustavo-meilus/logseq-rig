@@ -6,10 +6,10 @@ import subprocess
 import tempfile
 import unittest
 
-from vault_rig.__main__ import main
+from logseq_rig.__main__ import main
 
 
-def vault(root: Path, *, custom: bool = False) -> None:
+def graph(root: Path, *, custom: bool = False) -> None:
     pages, journals = ("notes", "daily") if custom else ("pages", "journals")
     (root / "logseq").mkdir(parents=True)
     (root / pages).mkdir()
@@ -30,7 +30,7 @@ class RetrievalTests(unittest.TestCase):
     def test_file_commands_preserve_logseq_evidence(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            vault(root, custom=True)
+            graph(root, custom=True)
             code, payload, _ = self.call("resolve", str(root), "Plan")
             self.assertEqual(code, 0); self.assertEqual(payload["result"]["page"], "Projects/Roadmap")
             code, payload, _ = self.call("find", str(root), "root-id")
@@ -48,7 +48,7 @@ class RetrievalTests(unittest.TestCase):
     def test_errors_and_history_are_machine_readable(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            vault(root)
+            graph(root)
             code, _, error = self.call("resolve", str(root), "missing")
             self.assertEqual(code, 2); self.assertEqual(json.loads(error)["code"], "not_found")
             (root / "pages" / "Duplicate.md").write_text("alias:: [[Plan]]\n", encoding="utf-8")

@@ -1,3 +1,3 @@
-# Codex integration contract
+# Codex integration
 
-Verified with Codex CLI 0.151.0. The managed payload uses `AGENTS.md`, `.agents/skills/vault-rig/SKILL.md`, `.codex/config.toml`, `.codex/hooks.json`, and `.codex/hooks/*.py`. Its supported configuration keys are `approval_policy`, `sandbox_mode`, and `sandbox_workspace_write.network_access`.
+The managed payload installs `AGENTS.md`, `.agents/skills/logseq-rig/SKILL.md`, and bounded Codex hooks. The Skill routes retrieval and checks through `logseq-rig`; hooks do not expose graph content or credentials.

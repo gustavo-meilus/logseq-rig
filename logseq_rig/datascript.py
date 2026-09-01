@@ -58,8 +58,8 @@ class Client:
 
     @classmethod
     def from_environment(cls) -> "Client":
-        endpoint = os.environ.get("VAULT_RIG_LOGSEQ_ENDPOINT", "")
-        token = os.environ.get("VAULT_RIG_LOGSEQ_TOKEN", "")
+        endpoint = os.environ.get("LOGSEQ_RIG_LOGSEQ_ENDPOINT", "")
+        token = os.environ.get("LOGSEQ_RIG_LOGSEQ_TOKEN", "")
         if not endpoint or not token:
             raise QueryError("bridge_unavailable", "Logseq endpoint and token must be configured")
         if not _loopback(endpoint):

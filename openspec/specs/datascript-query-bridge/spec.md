@@ -7,7 +7,7 @@ Adds an optional read-only bridge to Logseq OG's live DataScript view for relati
 ## Requirements
 
 ### Requirement: Live query availability is optional
-The system SHALL detect whether a supported local Logseq OG query endpoint is available without making that endpoint a prerequisite for core Logseq Vault Rig commands.
+The system SHALL detect whether a supported local Logseq OG query endpoint configured through the active Logseq Rig interface is available without making that endpoint a prerequisite for core commands.
 
 #### Scenario: Logseq endpoint is unavailable
 - **WHEN** a live query is requested while no supported endpoint is available
@@ -44,9 +44,9 @@ The DataScript bridge SHALL NOT mutate canonical graph data in this change.
 ### Requirement: Endpoint authority is minimized
 Endpoint credentials and local connection details MUST remain outside canonical notes and SHALL be exposed only to the query mechanism that requires them.
 
-#### Scenario: Vault content is inspected
+#### Scenario: Graph content is inspected
 - **WHEN** canonical pages and journals are searched
-- **THEN** they contain no bridge credentials introduced by Logseq Vault Rig
+- **THEN** they contain no bridge credentials introduced by Logseq Rig
 
 ### Requirement: Core behavior survives bridge removal
 Disabling or uninstalling the bridge SHALL leave canonical Markdown and all core file and Git retrieval behavior intact.

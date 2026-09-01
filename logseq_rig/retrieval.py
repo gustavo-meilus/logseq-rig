@@ -1,4 +1,4 @@
-"""Deterministic, on-demand retrieval from supported Logseq Markdown vaults."""
+"""Deterministic, on-demand retrieval from supported Logseq Markdown graphs."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import re
 import subprocess
 from urllib.parse import unquote
 
-from .detection import VaultDescriptor
+from .detection import GraphDescriptor
 
 
 class RetrievalError(Exception):
@@ -73,7 +73,7 @@ def _logical_name(relative: Path) -> str:
     return unquote(relative.with_suffix("").as_posix()).replace("___", "/")
 
 
-def _files(descriptor: VaultDescriptor) -> list[Path]:
+def _files(descriptor: GraphDescriptor) -> list[Path]:
     root = Path(descriptor.root)
     return sorted(path for directory in (descriptor.pages_directory, descriptor.journals_directory) for path in (root / directory).rglob("*.md"))
 
@@ -101,7 +101,7 @@ def _parse(path: Path, root: Path, page: str) -> Page:
     return Page(page, path.relative_to(root).as_posix(), page_properties, roots)
 
 
-def load(descriptor: VaultDescriptor) -> list[Page]:
+def load(descriptor: GraphDescriptor) -> list[Page]:
     root = Path(descriptor.root)
     pages: list[Page] = []
     for directory in (descriptor.pages_directory, descriptor.journals_directory):
@@ -177,7 +177,7 @@ def backlinks(pages: list[Page], name: str) -> list[dict[str, object]]:
     return [item.evidence() for item in blocks(pages) if any(ref in names for ref in item.page_refs)]
 
 
-def history(descriptor: VaultDescriptor, query: str, pages: list[Page]) -> list[dict[str, object]]:
+def history(descriptor: GraphDescriptor, query: str, pages: list[Page]) -> list[dict[str, object]]:
     root = Path(descriptor.root)
     source = root / query
     if source.is_file():
@@ -194,7 +194,7 @@ def history(descriptor: VaultDescriptor, query: str, pages: list[Page]) -> list[
     try:
         output = subprocess.run(command, text=True, capture_output=True, check=True).stdout
     except (OSError, subprocess.CalledProcessError) as error:
-        raise RetrievalError("history_unavailable", "Git history is unavailable for this vault") from error
+        raise RetrievalError("history_unavailable", "Git history is unavailable for this graph") from error
     result: list[dict[str, object]] = []
     current: dict[str, object] | None = None
     for line in output.splitlines():

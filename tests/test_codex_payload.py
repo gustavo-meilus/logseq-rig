@@ -30,15 +30,15 @@ class CodexPayloadTests(unittest.TestCase):
 
     def test_agents_region_and_skill_stay_concise(self):
         self.assertLess(len((PAYLOAD / "AGENTS.md").read_text(encoding="utf-8")), 600)
-        self.assertIn("vault-rig check", (PAYLOAD / ".agents/skills/vault-rig/SKILL.md").read_text(encoding="utf-8"))
+        self.assertIn("logseq-rig check", (PAYLOAD / ".agents/skills/logseq-rig/SKILL.md").read_text(encoding="utf-8"))
 
     def test_session_start_and_stop_are_bounded(self):
         success = type("Result", (), {"returncode": 0})()
-        session = self.hook("session_start.py", {"cwd": "/vault", "source": "startup"}, success)
+        session = self.hook("session_start.py", {"cwd": "/graph", "source": "startup"}, success)
         context = session["hookSpecificOutput"]["additionalContext"]
         self.assertLess(len(context), 500)
         self.assertNotIn("transcript", context)
-        self.assertEqual(self.hook("stop.py", {"cwd": "/vault", "stop_hook_active": False}, success), {})
+        self.assertEqual(self.hook("stop.py", {"cwd": "/graph", "stop_hook_active": False}, success), {})
         failed = type("Result", (), {"returncode": 1})()
-        self.assertEqual(self.hook("stop.py", {"cwd": "/vault", "stop_hook_active": False}, failed)["decision"], "block")
-        self.assertIn("unresolved", self.hook("stop.py", {"cwd": "/vault", "stop_hook_active": True}, failed)["systemMessage"])
+        self.assertEqual(self.hook("stop.py", {"cwd": "/graph", "stop_hook_active": False}, failed)["decision"], "block")
+        self.assertIn("unresolved", self.hook("stop.py", {"cwd": "/graph", "stop_hook_active": True}, failed)["systemMessage"])

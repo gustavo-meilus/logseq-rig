@@ -6,8 +6,8 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from vault_rig.detection import EdnReader, detect
-from vault_rig.__main__ import main
+from logseq_rig.detection import EdnReader, detect
+from logseq_rig.__main__ import main
 
 
 def tree_hash(root: Path) -> str:
@@ -19,7 +19,7 @@ def tree_hash(root: Path) -> str:
     return digest.hexdigest()
 
 
-def vault(root: Path, config: str = "{}") -> None:
+def graph(root: Path, config: str = "{}") -> None:
     (root / "logseq").mkdir()
     (root / "pages").mkdir()
     (root / "journals").mkdir()
@@ -38,9 +38,9 @@ class DetectionTests(unittest.TestCase):
 
     def test_default_and_custom_descriptors_are_stable_and_read_only(self):
         with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary) / "vault"
+            root = Path(temporary) / "graph"
             root.mkdir()
-            vault(root)
+            graph(root)
             before = tree_hash(root)
             default = detect(root).to_dict()
             self.assertEqual(before, tree_hash(root))
@@ -53,7 +53,7 @@ class DetectionTests(unittest.TestCase):
 
             custom = Path(temporary) / "custom"
             custom.mkdir()
-            vault(custom, '{:pages-directory "notes" :journals-directory "daily" :file/name-format :triple-lowbar :journal/file-name-format "yyyy-MM-dd"}')
+            graph(custom, '{:pages-directory "notes" :journals-directory "daily" :file/name-format :triple-lowbar :journal/file-name-format "yyyy-MM-dd"}')
             (custom / "pages").rmdir()
             (custom / "journals").rmdir()
             (custom / "notes").mkdir()
@@ -65,7 +65,7 @@ class DetectionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             base = Path(temporary)
             cases = {
-                "plain": ("non_vault", None),
+                "plain": ("non_graph", None),
                 "malformed": ("malformed_config", "{:pages-directory"),
                 "escape": ("path_escape", '{:pages-directory "../notes"}'),
                 "mode": ("unsupported_filename_mode", "{:file/name-format :legacy}"),
@@ -76,7 +76,7 @@ class DetectionTests(unittest.TestCase):
                 root = base / name
                 root.mkdir()
                 if config is not None:
-                    vault(root, config)
+                    graph(root, config)
                 stderr = io.StringIO()
                 with contextlib.redirect_stderr(stderr):
                     self.assertEqual(main(["detect", str(root)]), 2)
@@ -92,7 +92,7 @@ class DetectionTests(unittest.TestCase):
 
             good = base / "good"
             good.mkdir()
-            vault(good)
+            graph(good)
             stdout = io.StringIO()
             with contextlib.redirect_stdout(stdout):
                 self.assertEqual(main(["detect", str(good)]), 0)
