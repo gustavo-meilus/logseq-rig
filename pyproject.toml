@@ -1,6 +1,6 @@
 [project]
 name = "logseq-rig"
-version = "2.0.0"
+version = "1.0.1"
 description = "Local guardrails for AI-assisted Logseq OG graphs"
 requires-python = ">=3.11"
 
