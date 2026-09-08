@@ -59,7 +59,7 @@ def _installed_cli() -> None:
     with tempfile.TemporaryDirectory() as temporary:
         prefix = Path(temporary) / "installed"
         source = Path(temporary) / "source"
-        shutil.copytree(ROOT, source, ignore=shutil.ignore_patterns(".git", "build", "__pycache__", "*.pyc"))
+        shutil.copytree(ROOT, source, ignore=shutil.ignore_patterns(".git", "build", "*.egg-info", "*.dist-info", "__pycache__", "*.pyc"))
         executable = prefix / "Scripts" / "logseq-rig.exe"
         install = subprocess.run([sys.executable, "-m", "pip", "install", "--no-build-isolation", "--no-deps", "--no-index", "--no-cache-dir", "--prefix", str(prefix), str(source)], check=True, capture_output=True, text=True)
         environment = os.environ | {"PYTHONPATH": str(prefix / "Lib" / "site-packages")}
