@@ -61,7 +61,9 @@ def _installed_cli() -> None:
         source = Path(temporary) / "source"
         shutil.copytree(ROOT, source, ignore=shutil.ignore_patterns(".git", "build", "*.egg-info", "*.dist-info", "__pycache__", "*.pyc"))
         executable = prefix / "Scripts" / "logseq-rig.exe"
-        install = subprocess.run([sys.executable, "-m", "pip", "install", "--no-build-isolation", "--no-deps", "--no-index", "--no-cache-dir", "--prefix", str(prefix), str(source)], check=True, capture_output=True, text=True)
+        install = subprocess.run([sys.executable, "-m", "pip", "install", "--no-build-isolation", "--no-deps", "--no-index", "--no-cache-dir", "--prefix", str(prefix), str(source)], capture_output=True, text=True)
+        if install.returncode:
+            raise RuntimeError(f"offline install failed: {install.stderr}")
         environment = os.environ | {"PYTHONPATH": str(prefix / "Lib" / "site-packages")}
         if not executable.is_file() or subprocess.run([str(executable), "--help"], capture_output=True, text=True, env=environment).returncode:
             raise RuntimeError(f"installed logseq-rig command failed: {install.stderr}")
