@@ -43,7 +43,7 @@ class EdnReader:
 
     def _space(self) -> None:
         while self.position < len(self.text):
-            if self.text[self.position].isspace():
+            if self.text[self.position].isspace() or self.text[self.position] == ",":
                 self.position += 1
             elif self.text[self.position] == ";":
                 newline = self.text.find("\n", self.position)
@@ -123,7 +123,7 @@ class EdnReader:
 
     def _atom(self) -> str:
         start = self.position
-        while self.position < len(self.text) and not self.text[self.position].isspace() and self.text[self.position] not in "{}[]();\"":
+        while self.position < len(self.text) and not self.text[self.position].isspace() and self.text[self.position] not in "{}[]();\",":
             self.position += 1
         if start == self.position:
             raise ValueError("invalid EDN atom")
