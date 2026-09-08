@@ -1,0 +1,55 @@
+name: Bug report
+description: Report a reproducible problem in Logseq Rig.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Do not include private graph content, credentials, or vulnerability details. Use SECURITY.md for security reports.
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Include OS, Python version, and Logseq version if relevant.
+    validations:
+      required: true
+  - type: input
+    id: graph-type
+    attributes:
+      label: Graph type
+      description: State whether this is a Logseq OG Markdown graph and any relevant configuration.
+    validations:
+      required: true
+  - type: input
+    id: command
+    attributes:
+      label: Command
+      description: Give the exact command or operation that failed.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Sanitized output
+      description: Paste logs or JSON after removing graph content, credentials, and personal data.
+      render: shell
+    validations:
+      required: true
