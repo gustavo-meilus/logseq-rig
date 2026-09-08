@@ -87,6 +87,14 @@ git diff --check
 
 The project layout is intentional: `logseq_rig/` contains the CLI and core behavior, `payload/codex/` contains installed files, `tests/fixtures/` contains synthetic graphs, and `openspec/` contains current contracts and delivery history. See [docs/](docs/README.md) for supporting notes.
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the focused-change workflow, checks, and graph-safety boundaries. Use GitHub Discussions for questions and early ideas; use issues for actionable bugs and feature requests.
+
+## License
+
+Logseq Rig is released under the [MIT License](LICENSE).
+
 ## Release
 
 Before a release, run the full verification commands above, ensure relevant OpenSpec work is complete, commit the intended version, and publish the matching Git tag. The current package version is available through `logseq-rig --version`.

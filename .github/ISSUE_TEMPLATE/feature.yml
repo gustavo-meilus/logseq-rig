@@ -1,0 +1,32 @@
+name: Feature request
+description: Propose a concrete, safe improvement.
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: Use Discussions for early ideas or questions before opening a feature request.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user problem should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: textarea
+    id: graph-safety
+    attributes:
+      label: Graph-safety impact
+      description: Explain whether canonical graph content, managed payload ownership, or credentials are affected.
+    validations:
+      required: true

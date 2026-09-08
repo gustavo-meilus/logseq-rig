@@ -3,6 +3,7 @@ name = "logseq-rig"
 version = "1.0.1"
 description = "Local guardrails for AI-assisted Logseq OG graphs"
 requires-python = ">=3.11"
+license = {file = "LICENSE"}
 
 [project.scripts]
 logseq-rig = "logseq_rig.__main__:main"
