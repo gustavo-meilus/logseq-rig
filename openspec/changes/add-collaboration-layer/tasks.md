@@ -8,8 +8,8 @@
 ## 2. GitHub contribution surfaces
 
 - [x] 2.1 Add `.github/CODEOWNERS` assigning `@gustavo-meilus` to all files and `.github/`, then verify GitHub recognizes the file after the pull request is opened.
-- [ ] 2.2 Add bug and feature issue forms plus issue-template configuration that directs questions and early ideas to Discussions, then verify both forms render in GitHub and the bug form requires the specified diagnostic details.
-- [ ] 2.3 Add `.github/PULL_REQUEST_TEMPLATE.md` with change rationale, verification, documentation/OpenSpec, and graph-safety checklists, then verify a new pull request loads the template.
+- [x] 2.2 Add bug and feature issue forms plus issue-template configuration that directs questions and early ideas to Discussions, then verify both forms render in GitHub and the bug form requires the specified diagnostic details.
+- [x] 2.3 Add `.github/PULL_REQUEST_TEMPLATE.md` with change rationale, verification, documentation/OpenSpec, and graph-safety checklists, then verify a new pull request loads the template.
 
 ## 3. Continuous integration
 
@@ -26,4 +26,4 @@
 ## 5. Validate the delivered collaboration layer
 
 - [x] 5.1 Run `python -m unittest discover -s tests`, `python -m logseq_rig.release_validation fast`, `openspec validate --specs --strict --no-interactive`, and `git diff --check`, then verify all commands exit successfully.
-- [ ] 5.2 Review the rendered GitHub forms, pull-request template, CI result, and repository settings after merge, then verify the collaboration-governance spec scenarios are satisfied.
+- [x] 5.2 Review the rendered GitHub forms, pull-request template, CI result, and repository settings after merge, then verify the collaboration-governance spec scenarios are satisfied.
