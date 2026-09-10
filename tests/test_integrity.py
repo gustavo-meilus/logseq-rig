@@ -59,3 +59,49 @@ class IntegrityTests(unittest.TestCase):
             code, result = self.call("check", str(root), "--all")
             self.assertEqual(code, 1)
             self.assertEqual([item["message"] for item in result["findings"]], ["missing local asset: assets/missing_(1).png"])
+
+    def test_unique_property_duplicate_reports_all_locations(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary); graph(root, "- entry\n  slug:: dup\n")
+            (root / "pages" / "Other.md").write_text("- entry\n  slug:: dup\n", encoding="utf-8")
+            (root / "pages" / "Novel.md").write_text("- entry\n  slug:: solo\n", encoding="utf-8")
+            (root / ".logseq-rig").mkdir(); (root / ".logseq-rig" / "integrity.json").write_text('{"unique_properties":["slug"]}', encoding="utf-8")
+            code, result = self.call("check", str(root), "--all")
+            self.assertEqual(code, 1)
+            findings = [item for item in result["findings"] if item["code"] == "duplicate_property_value"]
+            self.assertEqual(len(findings), 1)
+            self.assertEqual({item["file"] for item in findings[0]["related"]}, {"pages/Test.md", "pages/Other.md"})
+
+    def test_unique_property_unconfigured_is_unrestricted(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary); graph(root, "- entry\n  slug:: dup\n")
+            (root / "pages" / "Other.md").write_text("- entry\n  slug:: dup\n", encoding="utf-8")
+            code, result = self.call("check", str(root), "--all")
+            self.assertEqual(code, 0)
+            self.assertNotIn("duplicate_property_value", {item["code"] for item in result["findings"]})
+
+    def test_unique_property_duplicate_changed_mode_scope(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            first = graph(root, "- entry\n  slug:: dup\n")
+            second = root / "pages" / "Other.md"; second.write_text("- entry\n  slug:: dup\n", encoding="utf-8")
+            (root / ".logseq-rig").mkdir(); (root / ".logseq-rig" / "integrity.json").write_text('{"unique_properties":["slug"]}', encoding="utf-8")
+            subprocess.run(["git", "init"], cwd=root, check=True, capture_output=True); subprocess.run(["git", "add", "."], cwd=root, check=True); subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@e", "commit", "-m", "base"], cwd=root, check=True, capture_output=True)
+
+            unrelated = root / "pages" / "Unrelated.md"; unrelated.write_text("- untouched\n", encoding="utf-8")
+            code, result = self.call("check", str(root), "--changed", "--expected-path", "pages/Unrelated.md")
+            self.assertNotIn("duplicate_property_value", {item["code"] for item in result["findings"]})
+
+            second.write_text("- entry\n  slug:: dup\n- another\n", encoding="utf-8")
+            code, result = self.call("check", str(root), "--changed", "--expected-path", "pages/Unrelated.md", "--expected-path", "pages/Other.md")
+            self.assertEqual(code, 1)
+            findings = [item for item in result["findings"] if item["code"] == "duplicate_property_value"]
+            self.assertEqual(len(findings), 1)
+            self.assertEqual({item["file"] for item in findings[0]["related"]}, {"pages/Test.md", "pages/Other.md"})
+
+    def test_invalid_unique_property_configuration_is_rejected(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary); graph(root, "- entry\n")
+            (root / ".logseq-rig").mkdir(); (root / ".logseq-rig" / "integrity.json").write_text('{"unique_properties":[1]}', encoding="utf-8")
+            code, result = self.call("check", str(root), "--all")
+            self.assertEqual(code, 2); self.assertEqual(result["status"], "capability_error")
