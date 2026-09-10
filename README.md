@@ -67,6 +67,17 @@ logseq-rig check C:\path\to\graph --all
 
 Run `check --changed` after editing canonical Markdown in a Git-backed graph. Use `--all` for a complete integrity pass.
 
+Property checks are opt-in and configured per graph in `.logseq-rig/integrity.json`:
+
+```json
+{
+  "controlled_properties": { "state": ["ok", "blocked"] },
+  "unique_properties": ["slug"]
+}
+```
+
+`controlled_properties` restricts a property to an allowed value set; `unique_properties` rejects the same value being assigned to a property more than once across the graph. Properties not listed in either are unrestricted.
+
 ## Optional live queries
 
 The DataScript bridge accepts only registered query names and loopback endpoints. Configure it outside the graph through `LOGSEQ_RIG_*` environment variables; never put endpoint tokens in notes, source, fixtures, or command output. Core detection, retrieval, lifecycle, and integrity commands do not require Logseq to be running.

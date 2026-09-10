@@ -66,6 +66,17 @@ def _controlled(root: Path) -> dict[str, set[str]]:
     return {key: set(values) for key, values in rules.items()}
 
 
+def _unique_properties(root: Path) -> set[str]:
+    path = root / ".logseq-rig" / "integrity.json"
+    if not path.exists():
+        return set()
+    value = json.loads(path.read_text(encoding="utf-8"))
+    names = value.get("unique_properties", [])
+    if not isinstance(names, list) or not all(isinstance(item, str) for item in names):
+        raise ValueError("invalid unique-property configuration")
+    return set(names)
+
+
 def _changed(descriptor: GraphDescriptor) -> tuple[set[str], dict[str, set[str]]]:
     root = Path(descriptor.root)
     try:
@@ -92,6 +103,7 @@ def check(descriptor: GraphDescriptor, mode: str, expected_paths: tuple[str, ...
     if mode == "changed":
         selected, deleted = _changed(descriptor)
     controlled = _controlled(root)
+    unique = _unique_properties(root)
     ids: dict[str, list[Location]] = defaultdict(list)
     refs: list[tuple[str, Location]] = []
     properties: list[tuple[str, str, Location]] = []
@@ -128,9 +140,15 @@ def check(descriptor: GraphDescriptor, mode: str, expected_paths: tuple[str, ...
         resolved = (root / location.file).parent.joinpath(target).resolve()
         if active(location) and root.resolve() in (resolved, *resolved.parents) and not resolved.exists():
             findings.append(_finding("missing_local_asset", location, f"missing local asset: {resolved.relative_to(root).as_posix()}"))
+    duplicates: dict[tuple[str, str], list[Location]] = defaultdict(list)
     for key, value, location in properties:
         if active(location) and key in controlled and value not in controlled[key]:
             findings.append(_finding("invalid_controlled_property", location, f"unsupported value for {key}: {value}"))
+        if key in unique:
+            duplicates[(key, value)].append(location)
+    for (key, value), locations in sorted(duplicates.items()):
+        if len(locations) > 1 and any(active(location) for location in locations):
+            findings.append(_finding("duplicate_property_value", next(location for location in locations if active(location)), f"duplicate value for {key}: {value}", locations))
     if selected is not None and expected_paths:
         allowed = set(expected_paths)
         for path in sorted(selected - allowed):
